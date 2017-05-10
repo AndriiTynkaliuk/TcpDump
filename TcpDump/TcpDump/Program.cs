@@ -10,11 +10,16 @@ namespace TcpDump
 {
     class Program
     {
+        private static Socket mainSocket;
+        private byte[] byteData = new byte[4096];
+        private static bool ContinueCapturing = false;
+
         static void Main(string[] args)
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("No arguments.");
+                DisplayAllPackats(ProtocolType.Tcp);
+                DisplayAllPackats(ProtocolType.Udp);
             }    
             else
             {
@@ -28,33 +33,68 @@ namespace TcpDump
                         break;
                 }
             }
+            Console.ReadKey(); // prevents from closing window after work is finished
         }
 
         static void DisplayAllPackats(ProtocolType protocol)
         {
-            byte[] byteData = new byte[1000];
+            try
+            {
+                if(!ContinueCapturing)
+                {
+                    byte[] byteData = new byte[1000];
 
-            Socket mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, protocol);
-            mainSocket.Bind(new IPEndPoint(IPAddress.Parse(GetLocalIPAddress()), 0));
-            mainSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.HeaderIncluded, true);
+                    mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, protocol);
+                    IPEndPoint endPoint = new IPEndPoint(GetLocalIPAddress(), 0); 
+                    mainSocket.Bind(endPoint);
+                    mainSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.HeaderIncluded, true);
 
-            byte[] byTrue = new byte[4] { 1, 0, 0, 0 };
-            byte[] byOut = new byte[4];
+                    byte[] byTrue = new byte[4] { 1, 0, 0, 0 };
+                    byte[] byOut = new byte[4];
 
-            mainSocket.IOControl(IOControlCode.ReceiveAll, byTrue, byOut);
+                    mainSocket.IOControl(IOControlCode.ReceiveAll, byTrue, byOut);
+
+                    mainSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
+                }
+                else
+                {
+                    ContinueCapturing = false;
+                    mainSocket.Close();
+                }                
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Display: " + e.StackTrace + " | " + e.Message);
+            }
         }
 
-        static string GetLocalIPAddress()
+        private static void OnReceive(IAsyncResult res)
+        {
+            try
+            {
+                int nReceived = mainSocket.EndReceive(res);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("OnReceive - " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Gets local computer IP address
+        /// </summary>
+        /// <returns></returns>
+        static IPAddress GetLocalIPAddress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (var ip in host.AddressList)
             {
                 if(ip.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    return ip.ToString();
+                    return ip;
                 }
             }
-            return "Local IP Address Not Found!";
+            return null;
         }
     }
 }
