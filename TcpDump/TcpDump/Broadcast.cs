@@ -6,12 +6,22 @@ namespace TcpDump
     class Broadcast : Packet
     {
         IPHeader ipHeader;
+        FilterType globalFilter;
 
-        public void ReceiveAllPackets()
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ReceiveAllPackets(FilterType filter)
         {
-            base.DisplayPackets();
+            globalFilter = filter;
+            Console.WriteLine("Protol\tSource IP:Port\t\tDestination IP:Port");
+            base.DisplayPackets(filter);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="res"></param>
         protected override void OnReceive(IAsyncResult res)
         {
             try
@@ -20,7 +30,7 @@ namespace TcpDump
 
                 ipHeader = new IPHeader(byteData, nReceived);
 
-                base.ParsePacket(ipHeader);
+                base.ParsePacket(ipHeader, globalFilter);
 
                 if(ContinueCapturing)
                 {
@@ -35,9 +45,58 @@ namespace TcpDump
             }
         }
 
-        protected override void Print()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="header"></param>
+        protected override void Print(params IHeader[] header)
         {
-            Console.WriteLine(string.Format("{0}\t{1}\t{2}", ipHeader.Protocol, ipHeader.SourceIP, ipHeader.DestIP));
+            if(globalFilter == FilterType.All)
+            {
+                var ipHeader = header[0] as IPHeader;
+                TCPHeader tcpHeader;
+                UDPHeader udpHeader;
+                if (header[1] is TCPHeader)
+                {
+                    tcpHeader = header[1] as TCPHeader;
+                    Console.WriteLine(string.Format("{0}\t{1}:{2}\t\t{3}:{4}",
+                    ipHeader.Protocol,
+                    ipHeader.SourceIP, tcpHeader.SourcePort,
+                    ipHeader.DestIP, tcpHeader.DestPort));
+                }
+                else if (header[1] is UDPHeader)
+                {
+                    udpHeader = header[1] as UDPHeader;
+                    Console.WriteLine(string.Format("{0}\t{1}:{2}\t\t{3}:{4}",
+                    ipHeader.Protocol,
+                    ipHeader.SourceIP, udpHeader.SourcePort,
+                    ipHeader.DestIP, udpHeader.DestPort));
+                }
+            }
+            else if (globalFilter == FilterType.TCP)
+            {
+                var ipHeader = header[0] as IPHeader;
+                if(ipHeader.Protocol == ProtocolType.Tcp)
+                {
+                    TCPHeader tcpHeader = header[1] as TCPHeader;
+                    Console.WriteLine(string.Format("{0}\t{1}:{2}\t\t{3}:{4}",
+                    ipHeader.Protocol,
+                    ipHeader.SourceIP, tcpHeader.SourcePort,
+                    ipHeader.DestIP, tcpHeader.DestPort));
+                }
+            }
+            else if (globalFilter == FilterType.UDP)
+            {
+                var ipHeader = header[0] as IPHeader;
+                if (ipHeader.Protocol == ProtocolType.Udp)
+                {
+                    UDPHeader udpHeader = header[1] as UDPHeader;
+                    Console.WriteLine(string.Format("{0}\t{1}:{2}\t\t{3}:{4}",
+                    ipHeader.Protocol,
+                    ipHeader.SourceIP, udpHeader.SourcePort,
+                    ipHeader.DestIP, udpHeader.DestPort));
+                }
+            }
         }
     }
 }

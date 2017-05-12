@@ -10,7 +10,7 @@ namespace TcpDump
         protected byte[] byteData = new byte[4096];
         protected static bool ContinueCapturing = false;
 
-        protected void DisplayPackets()
+        protected void DisplayPackets(FilterType filter)
         {
             try
             {
@@ -43,15 +43,47 @@ namespace TcpDump
             }
         }
 
-        protected virtual void ParsePacket(IPHeader protocol)
+        /// <summary>
+        /// Parses packets
+        /// </summary>
+        /// <param name="protocol"></param>
+        /// <param name="flag"></param>
+        protected virtual void ParsePacket(IPHeader protocol, FilterType filter)
         {
             try
             {
-                switch(protocol.Protocol)
+                IHeader header;
+                switch(filter)
                 {
-                    case ProtocolType.Tcp:
-                        Print();
+                    case FilterType.All:
+                        if (protocol.Protocol == ProtocolType.Tcp)
+                            header = new TCPHeader(protocol.Data, Convert.ToInt32(protocol.MessageLength));
+                        else
+                            header = new UDPHeader(protocol.Data, Convert.ToInt32(protocol.MessageLength));
+                        Print(protocol, header);
+
                         break;
+
+                    case FilterType.TCP:
+
+                        if (protocol.Protocol == ProtocolType.Tcp)
+                        {
+                            header = new TCPHeader(protocol.Data, Convert.ToInt32(protocol.MessageLength));
+                            Print(protocol, header);
+                        }
+
+                        break;
+
+                    case FilterType.UDP:
+
+                        if (protocol.Protocol == ProtocolType.Udp)
+                        {
+                            header = new UDPHeader(protocol.Data, Convert.ToInt32(protocol.MessageLength));
+                            Print(protocol, header);
+                        }
+
+                        break;
+
                 }
             }
             catch(Exception ex)
@@ -62,6 +94,6 @@ namespace TcpDump
 
         protected abstract void OnReceive(IAsyncResult res);
 
-        protected abstract void Print();
+        protected abstract void Print(params IHeader[] header);
     }
 }

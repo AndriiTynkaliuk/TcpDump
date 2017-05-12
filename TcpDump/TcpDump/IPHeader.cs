@@ -8,7 +8,7 @@ namespace TcpDump
     /// <summary>
     /// Represents an IP header fields
     /// </summary>
-    public class IPHeader
+    public class IPHeader : IHeader
     {
         private byte iVersionAndHeaderLength;     // 8 bits for Version and Header Length
         private byte iTypeOfService;              // 8 bits for Type of Service or DiffServ
@@ -266,6 +266,18 @@ namespace TcpDump
             {
                 return iIPData;
             }
+        }
+
+        public string SourcePort => throw new NotImplementedException();
+
+        public string DestPort => throw new NotImplementedException();
+
+        public void Print(IHeader header)
+        {
+            IPHeader newIPHeader = header as IPHeader;
+            Console.WriteLine(string.Format("Protocol\tSource IP\tDestination IP\tTotal Length"));
+            Console.WriteLine(string.Format("  {0}\t{1}\t{2}\t{3}", newIPHeader.Protocol,
+                newIPHeader.SourceIP, newIPHeader.DestIP, newIPHeader.TotalLength));
         }
     }
 }
