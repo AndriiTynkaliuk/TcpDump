@@ -1,6 +1,6 @@
 C:\Users\williamlv.ZS\Documents\TcpDump\TcpDump\TcpDump\bin\Debug\TcpDump.exe.config
 C:\Users\williamlv.ZS\Documents\TcpDump\TcpDump\TcpDump\bin\Debug\TcpDump.exe
 C:\Users\williamlv.ZS\Documents\TcpDump\TcpDump\TcpDump\bin\Debug\TcpDump.pdb
-C:\Users\williamlv.ZS\Documents\TcpDump\TcpDump\TcpDump\obj\Debug\TcpDump.csprojResolveAssemblyReference.cache
 C:\Users\williamlv.ZS\Documents\TcpDump\TcpDump\TcpDump\obj\Debug\TcpDump.exe
 C:\Users\williamlv.ZS\Documents\TcpDump\TcpDump\TcpDump\obj\Debug\TcpDump.pdb
+C:\Users\williamlv.ZS\Documents\TcpDump\TcpDump\TcpDump\obj\Debug\TcpDump.csprojResolveAssemblyReference.cache
