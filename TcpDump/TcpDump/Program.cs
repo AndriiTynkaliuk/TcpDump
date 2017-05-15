@@ -6,6 +6,10 @@ namespace TcpDump
 {
     class Program
     {
+        private static string manual = "  empty\t\tDisplays all connections and listening ports.\n  -p\t\tShows connections for the protocol specified"
+            + " after '-p'. It   \t\t\tcould be TCP or UDP.\n  -i\t\tShows connections for the secified Source IP.\n  -id\t\tShows connections for the secified Destination IP.\n"
+            + "  -os\t\tShows connections for the secified Source Port.\n  -osp\t\tShows connections for the secified Source IP and Port.";
+
         static void Main(string[] args)
         {
             if (args.Length == 0)
@@ -39,35 +43,42 @@ namespace TcpDump
 
                         break;
 
-                    case "-i":
+                    case "-i": // filter by source IP
 
                         if(args.Length > 1)
                         {
-
+                            Wale ipFiltering = new Wale();
+                            ipFiltering.ReceivePacket(FilterType.All, SpecFilter.SourceIP, args[1]);
                         }
                         else
                             Console.WriteLine("IP Address in needed");
 
                         break;
 
-                    case "-os":
+                    case "-id":
 
                         if (args.Length > 1)
                         {
                             Wale ipFiltering = new Wale();
-                            if (args.Length > 2)
-                            {
-                                ipFiltering.ReceivePacket(FilterType.All, SpecFilter.SourcePort, args[1]);
-                            }
-                            else
-                                Console.WriteLine("Enter an IP address");
-                            break;
+                            ipFiltering.ReceivePacket(FilterType.All, SpecFilter.DestIP, args[1]);
                         }
                         else
                             Console.WriteLine("IP Address in needed");
 
                         break;
-                    case "-osp":
+
+                    case "-os": // filter by source Port (-os Port#)
+
+                        if (args.Length > 1)
+                        {
+                            Wale ipFiltering = new Wale();
+                            ipFiltering.ReceivePacket(FilterType.All, SpecFilter.SourcePort, args[1]);
+                        }
+                        else
+                            Console.WriteLine("Port number is needed");
+
+                        break;
+                    case "-osp": // Filter by source port and protocol
 
                         if (args.Length > 1)
                         {
@@ -78,6 +89,8 @@ namespace TcpDump
                                     ipFiltering.ReceivePacket(FilterType.TCP, SpecFilter.SourcePort, args[2]);
                                 else if (args[1] == "udp" || args[1] == "UDP")
                                     ipFiltering.ReceivePacket(FilterType.UDP, SpecFilter.SourcePort, args[2]);
+                                else if (args[1] == "-a" || args[1] == "-A")
+                                    ipFiltering.ReceivePacket(FilterType.All, SpecFilter.SourcePort, args[2]);
                             }
                             else
                                 Console.WriteLine("Enter a Port number");
@@ -85,6 +98,12 @@ namespace TcpDump
                         }
                         else
                             Console.WriteLine("Enter type of protocol");
+
+                        break;
+
+                    case "man":
+
+                        Console.WriteLine(manual);
 
                         break;
                 }

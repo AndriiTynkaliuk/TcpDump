@@ -124,7 +124,7 @@ namespace TcpDump
         {
             get
             {
-                return string.Format("0x{0:x2} ({1})", iTypeOfService, 
+                return string.Format("0x{0:x2} ({1})", iTypeOfService,
                     iTypeOfService);
             }
         }
@@ -268,9 +268,9 @@ namespace TcpDump
             }
         }
 
-        public string SourcePort => throw new NotImplementedException();
+        public string SourcePort => throw new NotImplementedException("IP packet doesn't contain information about Port");
 
-        public string DestPort => throw new NotImplementedException();
+        public string DestPort => throw new NotImplementedException("IP packet doesn't contain information about Port");
 
         public void Print(IHeader header)
         {
